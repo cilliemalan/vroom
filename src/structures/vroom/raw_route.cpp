@@ -45,11 +45,20 @@ void RawRoute::update_amounts(const Input& input) {
   if (route.empty()) {
     // So that check in is_valid_addition_for_capacity is consistent
     // with empty routes.
-    std::ranges::fill(_fwd_peaks, _zero);
-    std::ranges::fill(_bwd_peaks, _zero);
+    //   std::ranges::fill(_fwd_peaks, _zero);
+    //   std::ranges::fill(_bwd_peaks, _zero);
+    for (size_t i = 0; i < _fwd_peaks.size(); i++) {
+      _fwd_peaks[i] = _zero;
+    }
+    for (size_t i = 0; i < _bwd_peaks.size(); i++) {
+      _bwd_peaks[i] = _zero;
+    }
     // So that check against break max_load and margins computations
     // are consistent with empty routes.
-    std::ranges::fill(_current_loads, _zero);
+    //   std::ranges::fill(_current_loads, _zero);
+    for (size_t i = 0; i < _current_loads.size(); i++) {
+      _current_loads[i] = _zero;
+    }
     return;
   }
 
