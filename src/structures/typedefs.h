@@ -92,6 +92,7 @@ struct Server {
   std::string host;
   std::string port;
   std::string path;
+  void* instance = nullptr;
 
   Server() : host("0.0.0.0"), port("5000") {
   }
@@ -102,6 +103,9 @@ struct Server {
 
   Server(std::string host, std::string port, std::string path)
     : host(std::move(host)), port(std::move(port)), path(std::move(path)) {
+  }
+
+  Server(void* instance) : instance(instance) {
   }
 };
 

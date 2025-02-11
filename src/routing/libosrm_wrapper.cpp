@@ -21,18 +21,8 @@ All rights reserved (see LICENSE).
 namespace vroom {
 namespace routing {
 
-osrm::EngineConfig LibosrmWrapper::get_config(const std::string& profile) {
-  osrm::EngineConfig config;
-
-  // Only update non-default values.
-  config.max_alternatives = 1;
-  config.dataset_name = profile;
-
-  return config;
-}
-
-LibosrmWrapper::LibosrmWrapper(const std::string& profile)
-  : Wrapper(profile), _config(get_config(profile)), _osrm(_config) {
+LibosrmWrapper::LibosrmWrapper(const osrm::OSRM& profile)
+  : Wrapper(DEFAULT_PROFILE), _osrm(profile) {
 }
 
 void throw_error(osrm::json::Object& result,
@@ -149,7 +139,7 @@ osrm::json::Object LibosrmWrapper::get_route_with_coordinates(
     std::vector<std::optional<double>>(params.coordinates.size(),
                                        DEFAULT_LIBOSRM_SNAPPING_RADIUS);
 
-      osrm::json::Object result;
+  osrm::json::Object result;
   osrm::Status status = _osrm.Route(params, result);
 
   if (status == osrm::Status::Error) {

@@ -51,11 +51,22 @@ void Input::add_routing_wrapper(const std::string& profile) {
   auto& routing_wrapper = _routing_wrappers.emplace_back();
 
   switch (_router) {
-  case ROUTER::LIBOSRM:
+  case ROUTER::LIBOSRM: {
 #if USE_LIBOSRM
     // Use libosrm.
+
+    auto search = _servers.find(profile);
+    if (search == _servers.end()) {
+      throw InputException("Invalid profile: " + profile + ".");
+    }
+
+    auto posrm = reinterpret_cast<osrm::OSRM*>(search->second.instance);
+    if (!posrm) {
+      throw InputException("Invalid configuration");
+    }
+
     try {
-      routing_wrapper = std::make_unique<routing::LibosrmWrapper>(profile);
+      routing_wrapper = std::make_unique<routing::LibosrmWrapper>(*posrm);
     } catch (const osrm::exception& e) {
       throw InputException("Invalid profile: " + profile + ".");
     }
@@ -64,6 +75,7 @@ void Input::add_routing_wrapper(const std::string& profile) {
     // Attempt to use libosrm while compiling without it.
     throw RoutingException("VROOM compiled without libosrm installed.");
 #endif
+  }
 #if USE_ROUTING
   case ROUTER::OSRM: {
     // Use osrm-routed.
@@ -95,7 +107,7 @@ void Input::add_routing_wrapper(const std::string& profile) {
 #endif
   default:
     throw RoutingException("Unsupported routing engine.");
-      break;
+    break;
   }
 }
 

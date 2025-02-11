@@ -21,16 +21,13 @@ namespace routing {
 class LibosrmWrapper : public Wrapper {
 
 private:
-  osrm::EngineConfig _config;
-  const osrm::OSRM _osrm;
+  const osrm::OSRM& _osrm;
 
   osrm::json::Object
   get_route_with_coordinates(const std::vector<Location>& locs) const;
 
-  static osrm::EngineConfig get_config(const std::string& profile);
-
 public:
-  explicit LibosrmWrapper(const std::string& profile);
+  explicit LibosrmWrapper(const osrm::OSRM& profile);
 
   Matrices get_matrices(const std::vector<Location>& locs) const override;
 
