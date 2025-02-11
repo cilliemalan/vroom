@@ -38,9 +38,6 @@ void Input::set_geometry(bool geometry) {
 }
 
 void Input::add_routing_wrapper(const std::string& profile) {
-#if !USE_ROUTING
-  throw RoutingException("VROOM compiled without routing support.");
-#else
 
   if (!_has_all_coordinates) {
     throw InputException("Missing coordinates for routing engine.");
@@ -54,15 +51,6 @@ void Input::add_routing_wrapper(const std::string& profile) {
   auto& routing_wrapper = _routing_wrappers.emplace_back();
 
   switch (_router) {
-  case ROUTER::OSRM: {
-    // Use osrm-routed.
-    auto search = _servers.find(profile);
-    if (search == _servers.end()) {
-      throw InputException("Invalid profile: " + profile + ".");
-    }
-    routing_wrapper =
-      std::make_unique<routing::OsrmRoutedWrapper>(profile, search->second);
-  } break;
   case ROUTER::LIBOSRM:
 #if USE_LIBOSRM
     // Use libosrm.
@@ -76,6 +64,16 @@ void Input::add_routing_wrapper(const std::string& profile) {
     // Attempt to use libosrm while compiling without it.
     throw RoutingException("VROOM compiled without libosrm installed.");
 #endif
+#if USE_ROUTING
+  case ROUTER::OSRM: {
+    // Use osrm-routed.
+    auto search = _servers.find(profile);
+    if (search == _servers.end()) {
+      throw InputException("Invalid profile: " + profile + ".");
+    }
+    routing_wrapper =
+      std::make_unique<routing::OsrmRoutedWrapper>(profile, search->second);
+  } break;
   case ROUTER::ORS: {
     // Use ORS http wrapper.
     auto search = _servers.find(profile);
@@ -94,8 +92,11 @@ void Input::add_routing_wrapper(const std::string& profile) {
     routing_wrapper =
       std::make_unique<routing::ValhallaWrapper>(profile, search->second);
   } break;
-  }
 #endif
+  default:
+    throw RoutingException("Unsupported routing engine.");
+      break;
+  }
 }
 
 void Input::check_amount_size(const Amount& amount) {
